@@ -3,6 +3,8 @@ local affix = require("hook.affix")
 
 local M = {}
 
+M._switch = false
+
 M.default = {
     width = 31,
     height = 7,
@@ -110,15 +112,18 @@ vim.api.nvim_create_autocmd({ "BufDelete" }, {
     end,
 })
 
-vim.api.nvim_create_autocmd({ "BufLeave" }, {
+vim.api.nvim_create_autocmd({ "WinLeave" }, {
     group = HookAugroup,
     pattern = "Hook",
     callback = function()
-        M._close()
+        if M._switch then
+            M._close()
+        end
     end,
 })
 
 M._close = function()
+    M._switch = false
     vim.api.nvim_win_close(M.winid, false)
     local win_names = vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false)
     win_names = affix.del(win_names, M.default.prefix, M.default.slen)
@@ -127,6 +132,7 @@ M._close = function()
 end
 
 M._open = function()
+    M._switch = true
     local bufnr = vim.api.nvim_get_current_buf()
     local winid = vim.fn.win_getid(vim.fn.bufwinnr(bufnr))
     local wintype = vim.fn.win_gettype(winid)

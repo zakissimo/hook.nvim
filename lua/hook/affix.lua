@@ -1,6 +1,10 @@
 local M = {}
 local devicons_ok, devicons = pcall(require, "nvim-web-devicons")
 
+M.trim = function(s)
+    return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+
 M.get = function(filename, prefix)
     local icon = prefix
     local e = vim.fn.fnamemodify(filename, ":e")
@@ -32,7 +36,9 @@ M.del = function(names, prefix, slen)
 
     for _, n in pairs(names) do
         local prefix_len = string.len(M.get(n, prefix)) + 2
-        table.insert(t, string.sub(n, prefix_len, -(slen + 2)))
+        local s = string.sub(n, prefix_len, -(slen + 2))
+
+        table.insert(t, M.trim(s))
     end
 
     return t
