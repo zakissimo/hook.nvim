@@ -175,7 +175,7 @@ end
 
 M.pull = function(idx)
     local bufnr = M.bmap[M.bnames[idx]]
-    if vim.fn.bufwinnr(M.bufnr) > -1 then M._close() end
+    if bufnr and vim.fn.bufwinnr(M.bufnr) > -1 then M._close() end
     if bufnr then vim.cmd("b " .. bufnr) end
 end
 
