@@ -20,6 +20,9 @@ M.setup = function(user_opts)
         M.default = vim.tbl_deep_extend("force", M.default, user_opts)
     end
     M.default.slen = string.len(M.default.suffix)
+
+    vim.api.nvim_create_user_command('HookPull', M.pull, { nargs = 1 })
+    vim.api.nvim_create_user_command('HookToggle', M.toggle, { nargs = 0 })
 end
 
 local init = function()
@@ -174,6 +177,7 @@ M.toggle = function()
 end
 
 M.pull = function(idx)
+    if type(idx) == "table" then idx = tonumber(idx.args) end
     local bufnr = M.bmap[M.bnames[idx]]
     if bufnr then vim.cmd("b " .. bufnr) end
 end
