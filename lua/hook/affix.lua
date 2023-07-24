@@ -2,6 +2,7 @@ local M = {}
 local devicons_ok, devicons = pcall(require, "nvim-web-devicons")
 
 M.trim = function(s)
+    if s == nil then return nil end
     return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
