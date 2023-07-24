@@ -35,7 +35,7 @@ M.del = function(names)
     local t = {}
 
     for _, n in pairs(names) do
-        local _, _, s = string.find(n, "%s(%w+/?%w+%.?%w+)%s")
+        local _, _, s = string.find(n, "%s(%w+/%w+%.?%w+%s?%(?%d*%)?)%s")
 
         table.insert(t, M.trim(s))
     end
@@ -44,7 +44,7 @@ M.del = function(names)
 end
 
 M.del_one = function(n)
-    local _, _, s = string.find(n, "%s(%w+/?%w+%.?%w+)%s")
+    local _, _, s = string.find(n, "%s(%w+/%w+%.?%w+%s?%(?%d*%)?)%s")
 
     return M.trim(s)
 end
