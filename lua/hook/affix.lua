@@ -31,12 +31,11 @@ M.add = function(names, prefix, map, usuffix)
     return len, t
 end
 
-M.del = function(names, prefix, slen)
+M.del = function(names)
     local t = {}
 
     for _, n in pairs(names) do
-        local prefix_len = string.len(M.get(n, prefix)) + 2
-        local s = string.sub(n, prefix_len, -(slen + 2))
+        local _, _, s = string.find(n, "%s(%w+/?%w+%.?%w+)%s")
 
         table.insert(t, M.trim(s))
     end
@@ -44,11 +43,10 @@ M.del = function(names, prefix, slen)
     return t
 end
 
+M.del_one = function(n)
+    local _, _, s = string.find(n, "%s(%w+/?%w+%.?%w+)%s")
 
-M.del_one = function(name, prefix, slen)
-    local prefix_len = string.len(M.get(name, prefix)) + 2
-
-    return string.sub(name, prefix_len, -(slen + 2))
+    return M.trim(s)
 end
 
 return M
