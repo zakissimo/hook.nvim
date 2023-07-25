@@ -6,6 +6,18 @@ M.trim = function(s)
     return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
+M.find_name_start = function(s)
+
+    local start = 0
+    for i = 1, #s, 1 do
+        if string.sub(s, i, i) == " " then
+            start = i
+            break
+        end
+    end
+    return start
+end
+
 M.get = function(filename, prefix)
     local icon = prefix
     local e = vim.fn.fnamemodify(filename, ":e")
@@ -32,11 +44,11 @@ M.add = function(names, prefix, map, usuffix)
     return len, t
 end
 
-M.del = function(names)
+M.del = function(names, suffix_len)
     local t = {}
 
     for _, n in pairs(names) do
-        local _, _, s = string.find(n, "%s(%w+/%w+%.?%w+%s?%(?%d*%)?)%s")
+        local s = string.sub(n, M.find_name_start(n), #n - suffix_len)
 
         table.insert(t, M.trim(s))
     end
@@ -44,8 +56,8 @@ M.del = function(names)
     return t
 end
 
-M.del_one = function(n)
-    local _, _, s = string.find(n, "%s(%w+/%w+%.?%w+%s?%(?%d*%)?)%s")
+M.del_one = function(n, suffix_len)
+    local s = string.sub(n, M.find_name_start(n), #n - suffix_len)
 
     return M.trim(s)
 end

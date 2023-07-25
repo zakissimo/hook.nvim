@@ -129,7 +129,7 @@ M._close = function()
     M._switch = false
     vim.api.nvim_win_close(M.winid, false)
     local win_names = vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false)
-    win_names = affix.del(win_names)
+    win_names = affix.del(win_names, M.default.slen)
     win_names = utils.remove_garbage_input(win_names, M.bmap)
     M.bnames = utils.close_bufs(win_names, M.bnames, M.bmap)
 end
@@ -154,7 +154,7 @@ M._open = function()
 end
 
 M._open_file = function(mode)
-    local name = affix.del_one(vim.api.nvim_get_current_line())
+    local name = affix.del_one(vim.api.nvim_get_current_line(), M.default.slen)
 
     M._close()
     if mode == "v" then
