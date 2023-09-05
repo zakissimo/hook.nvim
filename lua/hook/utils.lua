@@ -1,25 +1,5 @@
 local M = {}
 
-M.add_new_buf = function(bufnr, bnames, bmap, vim_init)
-    local binfo = vim.fn.getbufinfo(bufnr)[1]
-    local fname = vim.fn.fnamemodify(binfo.name, ":h:t")
-                    .. "/" .. vim.fn.fnamemodify(binfo.name, ":t")
-    local uniq_fname = fname .. " (" .. bufnr .. ")"
-
-    if binfo.name ~= ""
-        and (vim.fn.getftype(binfo.name) == "file" or vim_init)
-        and tonumber(binfo.listed) == 1
-        and bmap[fname] ~= bufnr
-        and bmap[uniq_fname] ~= bufnr
-    then
-        if bmap[fname] ~= nil then
-            fname = uniq_fname
-        end
-        table.insert(bnames, fname)
-        bmap[fname] = bufnr
-    end
-end
-
 M.remove_garbage_input = function(win_names, bmap)
     local new_win_names = {}
 

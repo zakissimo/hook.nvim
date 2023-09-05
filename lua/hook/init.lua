@@ -72,16 +72,38 @@ local config = {
     }
 }
 
+M.refresh_bufs = function()
+    local bnames = {}
+    local bmap = {}
+    local buf_data = vim.fn.getbufinfo()
+    for _, value in ipairs(buf_data) do
+        local binfo = vim.fn.getbufinfo(value.bufnr)[1]
+        local fname = vim.fn.fnamemodify(binfo.name, ":h:t")
+                        .. "/" .. vim.fn.fnamemodify(binfo.name, ":t")
+        local uniq_fname = fname .. " (" .. value.bufnr .. ")"
+
+        if binfo.name ~= ""
+            and vim.fn.getftype(binfo.name) == "file"
+            and tonumber(binfo.listed) == 1
+            and bmap[fname] ~= value.bufnr
+            and bmap[uniq_fname] ~= value.bufnr
+        then
+            if bmap[fname] ~= nil then
+                fname = uniq_fname
+            end
+            table.insert(bnames, fname)
+            bmap[fname] = value.bufnr
+        end
+    end
+    M.bnames = bnames
+    M.bmap = bmap
+end
+
 local HookAugroup = vim.api.nvim_create_augroup("HookAugroup", { clear = true })
 
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
+vim.api.nvim_create_autocmd({ "BufEnter" }, {
     group = HookAugroup,
-    callback = function()
-        local buf_data = vim.fn.getbufinfo()
-        for _, value in ipairs(buf_data) do
-            utils.add_new_buf(value.bufnr, M.bnames, M.bmap, true)
-        end
-    end,
+    callback = M.refresh_bufs
 })
 
 vim.api.nvim_create_autocmd({ "VimResized" }, {
@@ -89,29 +111,6 @@ vim.api.nvim_create_autocmd({ "VimResized" }, {
     callback = function()
         config.row = math.floor(((vim.o.lines - M.default.height) / 2) - 1)
         config.col = math.floor((vim.o.columns - config.width) / 2)
-    end,
-})
-
-vim.api.nvim_create_autocmd({ "BufEnter" }, {
-    group = HookAugroup,
-    callback = function()
-        local bufnr = vim.api.nvim_get_current_buf()
-        utils.add_new_buf(bufnr, M.bnames, M.bmap, false)
-    end,
-})
-
-vim.api.nvim_create_autocmd({ "BufDelete" }, {
-    group = HookAugroup,
-    callback = function()
-        local bufnr = vim.fn.expand("<abuf>")
-        if bufnr ~= nil then
-            for fname, b in pairs(M.bmap) do
-                if tonumber(b) == tonumber(bufnr) then
-                    M.bmap[fname] = nil
-                    table.remove(M.bnames, utils.get_idx(M.bnames, fname))
-                end
-            end
-        end
     end,
 })
 
@@ -142,6 +141,7 @@ M._open = function()
     if wintype == "popup" then
         print("Please close the current popup window before opening Hook.")
     else
+        M.refresh_bufs()
         local max_len, win_names = affix.add(M.bnames, M.default.prefix, M.bmap, M.default.suffix)
         if max_len > 0 then
             vim.api.nvim_buf_set_lines(M.bufnr, 0, -1, false, win_names)
