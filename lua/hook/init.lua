@@ -72,6 +72,27 @@ local config = {
     }
 }
 
+M.add_buf = function()
+    local bufnr = vim.api.nvim_get_current_buf()
+    local binfo = vim.fn.getbufinfo(bufnr)[1]
+    local fname = vim.fn.fnamemodify(binfo.name, ":h:t")
+                    .. "/" .. vim.fn.fnamemodify(binfo.name, ":t")
+    local uniq_fname = fname .. " (" .. bufnr .. ")"
+
+    if binfo.name ~= ""
+        and vim.fn.getftype(binfo.name) == "file"
+        and tonumber(binfo.listed) == 1
+        and M.bmap[fname] ~= bufnr
+        and M.bmap[uniq_fname] ~= bufnr
+    then
+        if M.bmap[fname] ~= nil then
+            fname = uniq_fname
+        end
+        table.insert(M.bnames, fname)
+        M.bmap[fname] = bufnr
+    end
+end
+
 M.refresh_bufs = function()
     local bnames = {}
     local bmap = {}
@@ -103,7 +124,7 @@ local HookAugroup = vim.api.nvim_create_augroup("HookAugroup", { clear = true })
 
 vim.api.nvim_create_autocmd({ "BufEnter" }, {
     group = HookAugroup,
-    callback = M.refresh_bufs
+    callback = M.add_buf
 })
 
 vim.api.nvim_create_autocmd({ "VimResized" }, {
