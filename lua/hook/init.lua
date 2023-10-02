@@ -93,33 +93,6 @@ M.add_buf = function()
     end
 end
 
-M.refresh_bufs = function()
-    local bnames = {}
-    local bmap = {}
-    local buf_data = vim.fn.getbufinfo()
-    for _, value in ipairs(buf_data) do
-        local binfo = vim.fn.getbufinfo(value.bufnr)[1]
-        local fname = vim.fn.fnamemodify(binfo.name, ":h:t")
-                        .. "/" .. vim.fn.fnamemodify(binfo.name, ":t")
-        local uniq_fname = fname .. " (" .. value.bufnr .. ")"
-
-        if binfo.name ~= ""
-            and vim.fn.getftype(binfo.name) == "file"
-            and tonumber(binfo.listed) == 1
-            and bmap[fname] ~= value.bufnr
-            and bmap[uniq_fname] ~= value.bufnr
-        then
-            if bmap[fname] ~= nil then
-                fname = uniq_fname
-            end
-            table.insert(bnames, fname)
-            bmap[fname] = value.bufnr
-        end
-    end
-    M.bnames = bnames
-    M.bmap = bmap
-end
-
 local HookAugroup = vim.api.nvim_create_augroup("HookAugroup", { clear = true })
 
 vim.api.nvim_create_autocmd({ "BufEnter" }, {
@@ -162,7 +135,6 @@ M._open = function()
     if wintype == "popup" then
         print("Please close the current popup window before opening Hook.")
     else
-        M.refresh_bufs()
         local max_len, win_names = affix.add(M.bnames, M.default.prefix, M.bmap, M.default.suffix)
         if max_len > 0 then
             vim.api.nvim_buf_set_lines(M.bufnr, 0, -1, false, win_names)
