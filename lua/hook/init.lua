@@ -100,6 +100,21 @@ vim.api.nvim_create_autocmd({ "BufEnter" }, {
     callback = M.add_buf
 })
 
+vim.api.nvim_create_autocmd({ "BufDelete" }, {
+    group = HookAugroup,
+    callback = function()
+        local bufnr = vim.fn.expand("<abuf>")
+        if bufnr ~= nil then
+            for fname, b in pairs(M.bmap) do
+                if tonumber(b) == tonumber(bufnr) then
+                    M.bmap[fname] = nil
+                    table.remove(M.bnames, utils.get_idx(M.bnames, fname))
+                end
+            end
+        end
+    end,
+})
+
 vim.api.nvim_create_autocmd({ "VimResized" }, {
     group = HookAugroup,
     callback = function()
