@@ -1,5 +1,9 @@
 local M = {}
 
+M.begins_with = function(str, prefix)
+    return string.sub(str, 1, #prefix) == prefix
+end
+
 M.remove_garbage_input = function(win_names, bmap)
     local new_win_names = {}
 

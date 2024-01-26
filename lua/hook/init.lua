@@ -10,7 +10,7 @@ M.default = {
     height = 7,
     prefix = ">",
     name = " Hook ",
-    suffix = "[+]"
+    suffix = "[+]",
 }
 
 M.setup = function(user_opts)
@@ -21,8 +21,8 @@ M.setup = function(user_opts)
     end
     M.default.slen = string.len(M.default.suffix)
 
-    vim.api.nvim_create_user_command('HookPull', M.pull, { nargs = 1 })
-    vim.api.nvim_create_user_command('HookToggle', M.toggle, { nargs = 0 })
+    vim.api.nvim_create_user_command("HookPull", M.pull, { nargs = 1 })
+    vim.api.nvim_create_user_command("HookToggle", M.toggle, { nargs = 0 })
 end
 
 local init = function()
@@ -31,7 +31,7 @@ local init = function()
     vim.cmd("highlight HookHl guifg=#ffffff")
     local opts = { buffer = M.bufnr, remap = false }
 
-    vim.keymap.set("n", ":", function ()
+    vim.keymap.set("n", ":", function()
         print("No command mode allowed while Hook is opened.")
     end, opts)
     vim.keymap.set("n", "<ESC>", function()
@@ -69,18 +69,18 @@ local config = {
         { "─", "HookHl" },
         { "╰", "HookHl" },
         { "│", "HookHl" },
-    }
+    },
 }
 
 M.add_buf = function()
     local bufnr = vim.api.nvim_get_current_buf()
     local binfo = vim.fn.getbufinfo(bufnr)[1]
-    local fname = vim.fn.fnamemodify(binfo.name, ":h:t")
-                    .. "/" .. vim.fn.fnamemodify(binfo.name, ":t")
+    local fname = vim.fn.fnamemodify(binfo.name, ":h:t") .. "/" .. vim.fn.fnamemodify(binfo.name, ":t")
     local uniq_fname = fname .. " (" .. bufnr .. ")"
 
-    if binfo.name ~= ""
-        and vim.fn.getftype(binfo.name) == "file"
+    if
+        binfo.name ~= ""
+        and (vim.fn.getftype(binfo.name) == "file" or utils.begins_with(binfo.name, "term"))
         and tonumber(binfo.listed) == 1
         and M.bmap[fname] ~= bufnr
         and M.bmap[uniq_fname] ~= bufnr
@@ -95,9 +95,9 @@ end
 
 local HookAugroup = vim.api.nvim_create_augroup("HookAugroup", { clear = true })
 
-vim.api.nvim_create_autocmd({ "BufEnter" }, {
+vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
     group = HookAugroup,
-    callback = M.add_buf
+    callback = M.add_buf,
 })
 
 vim.api.nvim_create_autocmd({ "BufDelete" }, {
@@ -156,7 +156,7 @@ M._open = function()
             config.width = max_len
             config.col = math.floor((vim.o.columns - config.width) / 2)
             M.winid = vim.api.nvim_open_win(M.bufnr, true, config)
-            vim.api.nvim_win_set_cursor(M.winid, {1, 1})
+            vim.api.nvim_win_set_cursor(M.winid, { 1, 1 })
         end
     end
 end
@@ -176,7 +176,9 @@ M._open_file = function(mode)
 end
 
 M.toggle = function()
-    if not M.bufnr then init() end
+    if not M.bufnr then
+        init()
+    end
     if vim.fn.bufwinnr(M.bufnr) <= -1 then
         M._open()
     else
@@ -185,9 +187,13 @@ M.toggle = function()
 end
 
 M.pull = function(idx)
-    if type(idx) == "table" then idx = tonumber(idx.args) end
+    if type(idx) == "table" then
+        idx = tonumber(idx.args)
+    end
     local bufnr = M.bmap[M.bnames[idx]]
-    if bufnr then vim.cmd("b " .. bufnr) end
+    if bufnr then
+        vim.cmd("b " .. bufnr)
+    end
 end
 
 return M
