@@ -78,13 +78,7 @@ M.add_buf = function()
     local fname = vim.fn.fnamemodify(binfo.name, ":h:t") .. "/" .. vim.fn.fnamemodify(binfo.name, ":t")
     local uniq_fname = fname .. " (" .. bufnr .. ")"
 
-    if
-        binfo.name ~= ""
-        and (vim.fn.getftype(binfo.name) == "file" or utils.begins_with(binfo.name, "term"))
-        and tonumber(binfo.listed) == 1
-        and M.bmap[fname] ~= bufnr
-        and M.bmap[uniq_fname] ~= bufnr
-    then
+    if binfo.name ~= "" and tonumber(binfo.listed) == 1 and M.bmap[fname] ~= bufnr and M.bmap[uniq_fname] ~= bufnr then
         if M.bmap[fname] ~= nil then
             fname = uniq_fname
         end
